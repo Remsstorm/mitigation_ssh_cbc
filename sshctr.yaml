@@ -1,0 +1,66 @@
+---
+####this script ditigation disable the reported weak encryption algorithm(s) aes128-cbc aes256-cbc
+
+- name: playbook
+  hosts: 10.250.0.29
+  become: yes
+  become_user: root
+  tasks:
+    - name: backup 
+      shell: cp /etc/ssh/sshd_config /etc/ssh/sshd_config.bak
+    - name: status of cipher used sshd
+      shell: sshd -T | grep "\(ciphers\|macs\|kexalgorithms\)"
+      register: result
+    - debug:
+        msg: "{{result.stdout}}"
+        
+    - name: mitigations cbc 
+      shell: echo "Ciphers aes128-ctr,aes192-ctr,aes256-ctr"
+    - name: add conf sshd_conf
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        line: Ciphers aes128-ctr,aes192-ctr,aes256-ctr
+    - name: reload conf  sshd 
+      shell: service sshd reload && service sshd reload 
+    - name: check status 
+      shell: service sshd status
+    - name: verify error occured
+      shell: echo $?
+      register: result1
+    - debug:
+        msg: "{{result1.stdout}}"
+#############################################client ssh    
+    - name: backup
+      shell: cp /etc/ssh/ssh_config /etc/ssh/ssh_config.bak
+    - name: mitigation cbc client
+      shell: echo "Ciphers aes128-ctr,aes192-ctr,aes256-ctr"
+    - name: mitigation ssh
+      lineinfile:
+        path: /etc/ssh/ssh_config
+        line: Ciphers aes128-ctr,aes192-ctr,aes256-ctr
+    - name: reload conf ssh 
+      shell: service ssh reload  && service ssh restart
+    - name: check status
+      shell: service ssh status
+    - name: verify error occured
+      shell: echo $?
+      register: result2
+    - debug:
+        msg: "{{result2.stdout}}"
+        
+   ######you can try this test if want see your cipher vulnerability is active make this: ssh -vv -oCiphers=3des-cbc,aes128-cbc,aes192-cbc,aes256-cbc hostname@ip
+
+
+
+ 
+
+
+
+
+
+
+ 
+
+
+
+
