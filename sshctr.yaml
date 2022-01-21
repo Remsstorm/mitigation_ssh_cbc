@@ -2,7 +2,7 @@
 ####this script ditigation disable the reported weak encryption algorithm(s) aes128-cbc aes256-cbc
 
 - name: playbook
-  hosts: 10.250.0.29
+  hosts: all
   become: yes
   become_user: root
   tasks:
